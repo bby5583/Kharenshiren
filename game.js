@@ -152,6 +152,10 @@ function checkCollisions() {
     player.onPlatform = false;
 
     platforms.forEach(platform => {
+        if (platform.y > player.y + player.height) {
+            return;
+        }
+
         if (player.x < platform.x + platform.width &&
             player.x + player.width > platform.x &&
             player.y + player.height >= platform.y &&
@@ -232,8 +236,8 @@ function update() {
         clearCanvas();
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         drawSpike();
-        drawPlayer();
         drawPlatforms();
+        drawPlayer(); // 플레이어가 발판보다 앞에 그려지도록 변경
         movePlayer();
         updatePlatforms();
         checkCollisions();
@@ -258,15 +262,15 @@ document.addEventListener('keydown', (e) => {
         update();
     }
 
-    if (e.key === 'ArrowRight') {
+    if (e.key === 'd' || e.key === 'D') {
         player.direction = 'right';
-    } else if (e.key === 'ArrowLeft') {
+    } else if (e.key === 'a' || e.key === 'A') {
         player.direction = 'left';
     }
 });
 
 document.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    if (e.key === 'd' || e.key === 'D' || e.key === 'a' || e.key === 'A') {
         player.dx = 0;
     }
 });
