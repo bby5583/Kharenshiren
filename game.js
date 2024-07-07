@@ -33,7 +33,7 @@ const player = {
     height: 80,
     speed: 4, // 이동 속도 증가
     dx: 0,
-    dy: 2,
+    dy: 4, // 낙하 속도 증가
     direction: 'right',
     onPlatform: false
 };
@@ -98,12 +98,13 @@ function generatePlatform() {
     let validPlatform = false;
 
     while (!validPlatform) {
-        x = Math.random() * (canvas.width - platformWidth);
+        x = Math.floor(Math.random() * (canvas.width / 50)) * 50;
         y = Math.random() * (canvas.height - platformHeight);
         type = Math.random() < 0.5 ? 'normal' : Math.random() < 0.5 ? 'moving' : 'jump';
 
-        // Check if the new platform overlaps with the player
-        if (!(x < player.x + player.width && x + platformWidth > player.x &&
+        // Check if the new platform overlaps with the player or the canvas boundaries
+        if (x + platformWidth <= canvas.width && x >= 0 &&
+            !(x < player.x + player.width && x + platformWidth > player.x &&
             y < player.y + player.height && y + platformHeight > player.y)) {
             validPlatform = true;
         }
@@ -177,13 +178,15 @@ function checkCollisions() {
     });
 
     if (!player.onPlatform) {
-        player.dy = 2;
+        player.dy = 4; // 낙하 속도 증가
     }
 
     if (player.y <= spike.height) {
         if (sounds.gameOver.src) sounds.gameOver.play();
         isGameOver = true;
     }
+
+    platforms = platforms.filter(platform => platform.y + platform.height > spike.height);
 }
 
 function updateScore() {
@@ -215,7 +218,7 @@ function resetGame() {
     player.x = canvas.width / 2 - 40;
     player.y = 50;
     player.dx = 0;
-    player.dy = 2;
+    player.dy = 4; // 낙하 속도 증가
     platforms = [];
     level = 1;
     score = 0;
