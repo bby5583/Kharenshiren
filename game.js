@@ -94,10 +94,25 @@ function drawPlatforms() {
 }
 
 function generatePlatform() {
-    const x = Math.random() * (canvas.width - platformWidth);
-    const type = Math.random() < 0.5 ? 'normal' : Math.random() < 0.5 ? 'moving' : 'jump';
-    const lastPlatformY = platforms.length ? Math.min(...platforms.map(p => p.y)) : canvas.height;
-    const y = lastPlatformY - 25 - Math.random() * 10; // 발판 간 최소 거리 25픽셀, 최대 거리 35픽셀
+    let x, y, type;
+    let validPlatform = false;
+
+    while (!validPlatform) {
+        x = Math.random() * (canvas.width - platformWidth);
+        y = Math.random() * (canvas.height - platformHeight);
+        type = Math.random() < 0.5 ? 'normal' : Math.random() < 0.5 ? 'moving' : 'jump';
+
+        // Check if the new platform overlaps with the player
+        if (!(x < player.x + player.width && x + platformWidth > player.x &&
+            y < player.y + player.height && y + platformHeight > player.y)) {
+            validPlatform = true;
+        }
+
+        // Ensure minimum vertical distance between platforms
+        if (validPlatform && platforms.some(platform => Math.abs(platform.y - y) < 25)) {
+            validPlatform = false;
+        }
+    }
 
     platforms.push({ x, y, width: platformWidth, height: platformHeight, type, dx: 2 });
 }
@@ -145,8 +160,8 @@ function checkCollisions() {
     platforms.forEach(platform => {
         if (player.x < platform.x + platform.width &&
             player.x + player.width > platform.x &&
-            player.y + player.height > platform.y &&
-            player.y + player.height < platform.y + platform.height) {
+            player.y + player.height >= platform.y &&
+            player.y + player.height <= platform.y + platform.height) {
             if (platform.type === 'normal') {
                 player.dy = 0;
                 player.onPlatform = true;
