@@ -144,12 +144,6 @@ function movePlayer() {
 function updatePlatforms() {
     platforms.forEach(platform => {
         platform.y -= 2;
-        if (platform.type === 'moving') {
-            platform.x += platform.dx;
-            if (platform.x <= 0 || platform.x + platform.width >= canvas.width) {
-                platform.dx *= -1;
-            }
-        }
     });
     platforms = platforms.filter(platform => platform.y + platform.height > 0);
 }
@@ -167,8 +161,8 @@ function checkCollisions() {
                 player.onPlatform = true;
                 player.y = platform.y - player.height;
             } else if (platform.type === 'moving') {
-                player.x += platform.dx;
                 player.dy = 0;
+                player.dx += platform.dx * 0.5; // 플레이어의 속도만 변경
                 player.onPlatform = true;
                 player.y = platform.y - player.height;
             } else if (platform.type === 'jump') {
@@ -245,7 +239,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.14) { // 발판 생성 간격 증가 (2배)
+        if (Math.random() < 0.28) { // 발판 생성 간격 증가 (2배)
             generatePlatform();
         }
 
