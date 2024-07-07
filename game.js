@@ -13,12 +13,12 @@ const playerSpriteLeft = new Image();
 playerSpriteRight.src = 'assets/player_right.png';
 playerSpriteLeft.src = 'assets/player_left.png';
 
-const platformNormalImage = new Image();
-platformNormalImage.src = 'assets/platform_normal.png';
-const platformMovingImage = new Image();
-platformMovingImage.src = 'assets/platform_moving.png';
-const platformJumpImage = new Image();
-platformJumpImage.src = 'assets/platform_jump.png';
+const groundNormalImage = new Image();
+groundNormalImage.src = 'assets/ground_normal.png';
+const groundMovingImage = new Image();
+groundMovingImage.src = 'assets/ground_moving.png';
+const groundJumpImage = new Image();
+groundJumpImage.src = 'assets/ground_jump.png';
 
 const spikeImage = new Image();
 spikeImage.src = 'assets/spike.png';
@@ -35,12 +35,12 @@ const player = {
     dx: 0,
     dy: 4,
     direction: 'right',
-    onPlatform: false
+    onGround: false
 };
 
-let platforms = [];
-const platformWidth = canvas.width / 4;
-const platformHeight = 25; // 고정 높이
+let grounds = [];
+const groundWidth = canvas.width / 4;
+const groundHeight = 25; // 고정 높이
 
 let level = 1;
 let highScore = localStorage.getItem('highScore') || 0;
@@ -81,25 +81,25 @@ function drawSpike() {
     ctx.drawImage(spikeImage, spike.x, spike.y, spike.width, spike.height);
 }
 
-function drawPlatforms() {
-    platforms.forEach(platform => {
-        if (platform.type === 'normal') {
-            ctx.drawImage(platformNormalImage, platform.x, platform.y, platform.width, platform.height);
-        } else if (platform.type === 'moving') {
-            ctx.drawImage(platformMovingImage, platform.x, platform.y, platform.width, platform.height);
-        } else if (platform.type === 'jump') {
-            ctx.drawImage(platformJumpImage, platform.x, platform.y, platform.width, platform.height);
+function drawGrounds() {
+    grounds.forEach(ground => {
+        if (ground.type === 'normal') {
+            ctx.drawImage(groundNormalImage, ground.x, ground.y, ground.width, ground.height);
+        } else if (ground.type === 'moving') {
+            ctx.drawImage(groundMovingImage, ground.x, ground.y, ground.width, ground.height);
+        } else if (ground.type === 'jump') {
+            ctx.drawImage(groundJumpImage, ground.x, ground.y, ground.width, ground.height);
         }
     });
 }
 
-function generatePlatform() {
+function generateGround() {
     let x, y, type, direction;
-    let validPlatform = false;
+    let validGround = false;
 
-    while (!validPlatform) {
+    while (!validGround) {
         x = Math.floor(Math.random() * (canvas.width / 50)) * 50;
-        y = Math.random() * (canvas.height - platformHeight);
+        y = Math.random() * (canvas.height - groundHeight);
         const rand = Math.random();
 
         if (rand < 0.7) {
@@ -111,20 +111,20 @@ function generatePlatform() {
             type = 'jump';
         }
 
-        if (x + platformWidth <= canvas.width && x >= 0 &&
-            !(x < player.x + player.width && x + platformWidth > player.x &&
-            y < player.y + player.height && y + platformHeight > player.y)) {
-            validPlatform = true;
+        if (x + groundWidth <= canvas.width && x >= 0 &&
+            !(x < player.x + player.width && x + groundWidth > player.x &&
+            y < player.y + player.height && y + groundHeight > player.y)) {
+            validGround = true;
         }
 
-        if (validPlatform && platforms.every(platform => Math.abs(platform.y - y) >= 50)) {
-            validPlatform = true;
+        if (validGround && grounds.every(ground => Math.abs(ground.y - y) >= 50)) {
+            validGround = true;
         } else {
-            validPlatform = false;
+            validGround = false;
         }
     }
 
-    platforms.push({ x, y, width: platformWidth, height: platformHeight, type, dx: 2, direction });
+    grounds.push({ x, y, width: groundWidth, height: groundHeight, type, dx: 2, direction });
 }
 
 function movePlayer() {
@@ -151,37 +151,37 @@ function movePlayer() {
     }
 }
 
-function updatePlatforms() {
-    platforms.forEach(platform => {
-        platform.y -= 2;
+function updateGrounds() {
+    grounds.forEach(ground => {
+        ground.y -= 2;
     });
-    platforms = platforms.filter(platform => platform.y + platform.height > 0);
+    grounds = grounds.filter(ground => ground.y + ground.height > 0);
 }
 
 function checkCollisions() {
-    player.onPlatform = false;
+    player.onGround = false;
 
-    platforms.forEach(platform => {
-        if (player.y + player.height <= platform.y && player.y + player.height + player.dy >= platform.y) {
-            if (player.x < platform.x + platform.width && player.x + player.width > platform.x) {
+    grounds.forEach(ground => {
+        if (player.y + player.height <= ground.y && player.y + player.height + player.dy >= ground.y) {
+            if (player.x < ground.x + ground.width && player.x + player.width > ground.x) {
                 player.dy = 0;
-                player.onPlatform = true;
-                player.y = platform.y - player.height;
+                player.onGround = true;
+                player.y = ground.y - player.height;
                 
-                if (platform.type === 'moving') {
-                    if (platform.direction === 'right') {
-                        player.dx += platform.dx;
+                if (ground.type === 'moving') {
+                    if (ground.direction === 'right') {
+                        player.dx += ground.dx;
                     } else {
-                        player.dx -= platform.dx;
+                        player.dx -= ground.dx;
                     }
-                } else if (platform.type === 'jump') {
+                } else if (ground.type === 'jump') {
                     player.dy = -5; // 점프력 감소
                 }
             }
         }
     });
 
-    if (!player.onPlatform) {
+    if (!player.onGround) {
         player.dy = 4; // 낙하 속도 증가
     }
 
@@ -190,7 +190,7 @@ function checkCollisions() {
         isGameOver = true;
     }
 
-    platforms = platforms.filter(platform => platform.y + platform.height > spike.height);
+    grounds = grounds.filter(ground => ground.y + ground.height > spike.height);
 }
 
 function updateScore() {
@@ -229,7 +229,7 @@ function resetGame() {
     player.y = 50;
     player.dx = 0;
     player.dy = 4; // 낙하 속도 증가
-    platforms = [];
+    grounds = [];
     level = 1;
     score = 0;
     isGameOver = false;
@@ -249,15 +249,15 @@ function update() {
         clearCanvas();
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         drawSpike();
-        drawPlatforms();
+        drawGrounds();
         drawPlayer();
         movePlayer();
-        updatePlatforms();
+        updateGrounds();
         checkCollisions();
         updateScore();
 
         if (Math.random() < 0.6) {
-            generatePlatform();
+            generateGround();
         }
 
         requestAnimationFrame(update);
@@ -289,4 +289,17 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-document
+document.addEventListener('click', () => {
+    if (!isGameStarted) {
+        isGameStarted = true;
+        startScreen.style.display = 'none';
+        if (sounds.start.src) sounds.start.play();
+        if (sounds.background.src) sounds.background.play();
+        setTimeout(updateLevel, 15000);
+        update();
+    }
+});
+
+retryButton.addEventListener('click', resetGame);
+
+resetGame();
