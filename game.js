@@ -31,9 +31,9 @@ const player = {
     y: 50,
     width: 80,
     height: 80,
-    speed: 4, // 이동 속도 증가
+    speed: 4,
     dx: 0,
-    dy: 4, // 낙하 속도 증가
+    dy: 4,
     direction: 'right',
     onPlatform: false
 };
@@ -110,14 +110,12 @@ function generatePlatform() {
             type = 'jump';
         }
 
-        // Check if the new platform overlaps with the player or the canvas boundaries
         if (x + platformWidth <= canvas.width && x >= 0 &&
             !(x < player.x + player.width && x + platformWidth > player.x &&
             y < player.y + player.height && y + platformHeight > player.y)) {
             validPlatform = true;
         }
 
-        // Ensure minimum vertical distance between platforms
         if (validPlatform && platforms.some(platform => Math.abs(platform.y - y) < 25)) {
             validPlatform = false;
         }
@@ -161,8 +159,8 @@ function checkCollisions() {
     player.onPlatform = false;
 
     platforms.forEach(platform => {
-        // 캐릭터가 발판 위에 있을 때만 발판 위에 있는 것으로 처리
         if (player.y + player.height <= platform.y) {
+            // 캐릭터가 발판 위에 있을 때만 발판 위에 있는 것으로 처리
             if (player.x < platform.x + platform.width && player.x + player.width > platform.x) {
                 if (player.dy > 0) { // 캐릭터가 내려오는 중일 때만
                     if (platform.type === 'normal') {
@@ -181,7 +179,7 @@ function checkCollisions() {
                     }
                 }
             }
-        } else if (player.y + player.height > platform.y) {
+        } else if (player.y + player.height > platform.y && player.y < platform.y + platform.height) {
             // 캐릭터가 발판 아래에 있을 때 겹침 허용 및 캐릭터가 앞에 그려지도록 함
             if (player.x < platform.x + platform.width && player.x + player.width > platform.x) {
                 if (platform.type === 'moving') {
@@ -260,7 +258,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.6) { // 발판 생성 간격 감소 (더 자주 생성)
+        if (Math.random() < 0.2) { // 발판 생성 간격 감소 (더 자주 생성)
             generatePlatform();
         }
 
