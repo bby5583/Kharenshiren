@@ -31,7 +31,7 @@ const player = {
     y: 50,
     width: 80,
     height: 80,
-    speed: 1,
+    speed: 2, // 이동 속도 증가
     dx: 0,
     dy: 2,
     direction: 'right',
