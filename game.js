@@ -100,7 +100,15 @@ function generatePlatform() {
     while (!validPlatform) {
         x = Math.floor(Math.random() * (canvas.width / 50)) * 50;
         y = Math.random() * (canvas.height - platformHeight);
-        type = Math.random() < 0.5 ? 'normal' : Math.random() < 0.5 ? 'moving' : 'jump';
+        const rand = Math.random();
+
+        if (rand < 0.7) {
+            type = 'normal';
+        } else if (rand < 0.85) {
+            type = 'moving';
+        } else {
+            type = 'jump';
+        }
 
         // Check if the new platform overlaps with the player or the canvas boundaries
         if (x + platformWidth <= canvas.width && x >= 0 &&
@@ -153,14 +161,8 @@ function checkCollisions() {
     player.onPlatform = false;
 
     platforms.forEach(platform => {
-        if (platform.y > player.y + player.height) {
-            return;
-        }
-
-        if (player.x < platform.x + platform.width &&
-            player.x + player.width > platform.x &&
-            player.y + player.height >= platform.y &&
-            player.y + player.height <= platform.y + platform.height) {
+        // 캐릭터가 발판보다 위에 있을 때만 발판 위에 있는 것으로 처리
+        if (player.y + player.height <= platform.y && player.x < platform.x + platform.width && player.x + player.width > platform.x) {
             if (platform.type === 'normal') {
                 player.dy = 0;
                 player.onPlatform = true;
@@ -173,6 +175,7 @@ function checkCollisions() {
             } else if (platform.type === 'jump') {
                 player.dy = -5; // 점프력 감소
                 player.onPlatform = true;
+                player.y = platform.y - player.height;
             }
         }
     });
@@ -246,7 +249,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.42) { // 발판 생성 간격 감소 (60%)
+        if (Math.random() < 0.6) { // 발판 생성 간격 감소 (더 자주 생성)
             generatePlatform();
         }
 
