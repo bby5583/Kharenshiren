@@ -31,7 +31,7 @@ const player = {
     y: 50,
     width: 80,
     height: 80,
-    speed: 2, // 이동 속도 증가
+    speed: 4, // 이동 속도 증가
     dx: 0,
     dy: 2,
     direction: 'right',
@@ -243,7 +243,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.28) { // 발판 생성 간격 증가 (2배)
+        if (Math.random() < 0.42) { // 발판 생성 간격 감소 (60%)
             generatePlatform();
         }
 
@@ -262,15 +262,15 @@ document.addEventListener('keydown', (e) => {
         update();
     }
 
-    if (e.key === 'd' || e.key === 'D') {
+    if (e.key.toLowerCase() === 'd') {
         player.direction = 'right';
-    } else if (e.key === 'a' || e.key === 'A') {
+    } else if (e.key.toLowerCase() === 'a') {
         player.direction = 'left';
     }
 });
 
 document.addEventListener('keyup', (e) => {
-    if (e.key === 'd' || e.key === 'D' || e.key === 'a' || e.key === 'A') {
+    if (e.key.toLowerCase() === 'd' || e.key.toLowerCase() === 'a') {
         player.dx = 0;
     }
 });
