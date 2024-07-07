@@ -3,18 +3,28 @@ const ctx = canvas.getContext('2d');
 const scoreboard = document.getElementById('scoreboard');
 const levelDisplay = document.getElementById('level');
 const highScoreDisplay = document.getElementById('highScore');
+const startScreen = document.getElementById('startScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const finalLevelDisplay = document.getElementById('finalLevel');
+const retryButton = document.getElementById('retryButton');
+
+const playerSpriteRight = new Image();
+const playerSpriteLeft = new Image();
+playerSpriteRight.src = 'player_right.png'; // 오른쪽을 향하는 스프라이트 이미지 경로
+playerSpriteLeft.src = 'player_left.png';  // 왼쪽을 향하는 스프라이트 이미지 경로
 
 const player = {
     x: canvas.width / 2 - 15,
     y: 50,
     width: 30,
     height: 30,
-    speed: 5,
+    speed: 1,
     dx: 0,
-    dy: 2
+    dy: 2,
+    direction: 'right'
 };
 
-const platforms = [];
+let platforms = [];
 const platformWidth = canvas.width / 4;
 const platformHeight = 10;
 
@@ -22,6 +32,7 @@ let level = 1;
 let highScore = localStorage.getItem('highScore') || 0;
 let score = 0;
 let isGameOver = false;
+let isGameStarted = false;
 
 const spike = {
     x: 0,
@@ -35,9 +46,21 @@ const keys = {
     left: false
 };
 
+const sounds = {
+    start: new Audio('start.mp3'),
+    fall: new Audio('fall.mp3'),
+    gameOver: new Audio('gameover.mp3'),
+    background: new Audio('background.mp3')
+};
+
+sounds.background.loop = true;
+
 function drawPlayer() {
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    if (player.direction === 'right') {
+        ctx.drawImage(playerSpriteRight, player.x, player.y, player.width, player.height);
+    } else {
+        ctx.drawImage(playerSpriteLeft, player.x, player.y, player.width, player.height);
+    }
 }
 
 function drawSpike() {
@@ -62,15 +85,14 @@ function movePlayer() {
     player.x += player.dx;
     player.y += player.dy;
 
-    if (keys.right && player.x + player.width < canvas.width) {
+    if (player.direction === 'right' && player.x + player.width < canvas.width) {
         player.dx = player.speed;
-    } else if (keys.left && player.x > 0) {
+    } else if (player.direction === 'left' && player.x > 0) {
         player.dx = -player.speed;
-    } else {
-        player.dx = 0;
     }
 
     if (player.y + player.height >= canvas.height) {
+        if (sounds.fall.src) sounds.fall.play();
         isGameOver = true;
     }
 }
@@ -106,6 +128,7 @@ function checkCollisions() {
     });
 
     if (player.y <= spike.height) {
+        if (sounds.gameOver.src) sounds.gameOver.play();
         isGameOver = true;
     }
 }
@@ -130,12 +153,32 @@ function clearCanvas() {
 }
 
 function gameOver() {
-    ctx.fillStyle = 'white';
-    ctx.font = '30px Arial';
-    ctx.fillText('Game Over', canvas.width / 2 - 70, canvas.height / 2);
+    finalLevelDisplay.textContent = `Level: ${level}`;
+    gameOverScreen.style.display = 'flex';
+    if (sounds.background.src) sounds.background.pause();
+}
+
+function resetGame() {
+    player.x = canvas.width / 2 - 15;
+    player.y = 50;
+    player.dx = 0;
+    player.dy = 2;
+    platforms = [];
+    level = 1;
+    score = 0;
+    isGameOver = false;
+    isGameStarted = false;
+    startScreen.style.display = 'flex';
+    gameOverScreen.style.display = 'none';
+    clearCanvas();
+    updateScore();
 }
 
 function update() {
+    if (!isGameStarted) {
+        return;
+    }
+
     if (!isGameOver) {
         clearCanvas();
         drawSpike();
@@ -156,20 +199,38 @@ function update() {
     }
 }
 
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', (e) => {
+    if (!isGameStarted) {
+        isGameStarted = true;
+        startScreen.style.display = 'none';
+        if (sounds.start.src) sounds.start.play();
+        if (sounds.background.src) sounds.background.play();
+        update();
+    }
+
     if (e.key === 'ArrowRight') {
-        keys.right = true;
+        player.direction = 'right';
     } else if (e.key === 'ArrowLeft') {
-        keys.left = true;
+        player.direction = 'left';
     }
 });
 
-document.addEventListener('keyup', e => {
-    if (e.key === 'ArrowRight') {
-        keys.right = false;
-    } else if (e.key === 'ArrowLeft') {
-        keys.left = false;
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        player.dx = 0;
     }
 });
 
-update();
+document.addEventListener('click', () => {
+    if (!isGameStarted) {
+        isGameStarted = true;
+        startScreen.style.display = 'none';
+        if (sounds.start.src) sounds.start.play();
+        if (sounds.background.src) sounds.background.play();
+        update();
+    }
+});
+
+retryButton.addEventListener('click', resetGame);
+
+resetGame();

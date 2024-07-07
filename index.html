@@ -3,15 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Platform Descent Game</title>
+    <title>당근카렌의 시련</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="game-container">
         <canvas id="gameCanvas" width="800" height="800"></canvas>
         <div id="scoreboard">
-            <p>Level: <span id="level">1</span></p>
-            <p>High Score: <span id="highScore">0</span></p>
+            <p>Level: <span id="층">1</span></p>
+            <p>High Score: <span id="최고층수">0</span></p>
+        </div>
+        <div id="startScreen">
+            <p>시작하려면 아무키나 누르세요!</p>
+        </div>
+        <div id="gameOverScreen" style="display: none;">
+            <p id="마지막 층">Level: 0</p>
+            <button id="retryButton">Retry</button>
         </div>
     </div>
     <script src="game.js"></script>
