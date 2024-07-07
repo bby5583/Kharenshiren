@@ -94,7 +94,7 @@ function drawPlatforms() {
 }
 
 function generatePlatform() {
-    let x, y, type;
+    let x, y, type, direction;
     let validPlatform = false;
 
     while (!validPlatform) {
@@ -106,13 +106,12 @@ function generatePlatform() {
             type = 'normal';
         } else if (rand < 0.85) {
             type = 'moving';
+            direction = Math.random() < 0.5 ? 'left' : 'right';
         } else {
             type = 'jump';
         }
 
-        if (x + platformWidth <= canvas.width && x >= 0 &&
-            !(x < player.x + player.width && x + platformWidth > player.x &&
-            y < player.y + player.height && y + platformHeight > player.y)) {
+        if (x + platformWidth <= canvas.width && x >= 0) {
             validPlatform = true;
         }
 
@@ -121,7 +120,7 @@ function generatePlatform() {
         }
     }
 
-    platforms.push({ x, y, width: platformWidth, height: platformHeight, type, dx: 2 });
+    platforms.push({ x, y, width: platformWidth, height: platformHeight, type, dx: 2, direction });
 }
 
 function movePlayer() {
@@ -159,13 +158,18 @@ function checkCollisions() {
     player.onPlatform = false;
 
     platforms.forEach(platform => {
-        if (player.y + player.height <= platform.y && player.y + player.height + player.dy >= platform.y && player.dx === 0) {
+        if (player.y + player.height <= platform.y && player.y + player.height + player.dy >= platform.y) {
             if (player.x < platform.x + platform.width && player.x + player.width > platform.x) {
                 player.dy = 0;
                 player.onPlatform = true;
                 player.y = platform.y - player.height;
+                
                 if (platform.type === 'moving') {
-                    player.dx += platform.dx * 0.5;
+                    if (platform.direction === 'right') {
+                        player.dx += platform.dx;
+                    } else {
+                        player.dx -= platform.dx;
+                    }
                 } else if (platform.type === 'jump') {
                     player.dy = -5; // 점프력 감소
                 }
