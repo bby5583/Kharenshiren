@@ -34,7 +34,8 @@ const player = {
     speed: 1,
     dx: 0,
     dy: 2,
-    direction: 'right'
+    direction: 'right',
+    onPlatform: false
 };
 
 let platforms = [];
@@ -95,8 +96,8 @@ function drawPlatforms() {
 function generatePlatform() {
     const x = Math.random() * (canvas.width - platformWidth);
     const type = Math.random() < 0.5 ? 'normal' : Math.random() < 0.5 ? 'moving' : 'jump';
-    const lastPlatformY = platforms.length ? platforms[platforms.length - 1].y : canvas.height;
-    const y = lastPlatformY - 90 - Math.random() * 10; // 발판 간 최소 거리 10픽셀, 최대 거리 100픽셀
+    const lastPlatformY = platforms.length ? Math.min(...platforms.map(p => p.y)) : canvas.height;
+    const y = lastPlatformY - 25 - Math.random() * 10; // 발판 간 최소 거리 25픽셀, 최대 거리 35픽셀
 
     platforms.push({ x, y, width: platformWidth, height: platformHeight, type, dx: 2 });
 }
@@ -139,21 +140,32 @@ function updatePlatforms() {
 }
 
 function checkCollisions() {
+    player.onPlatform = false;
+
     platforms.forEach(platform => {
         if (player.x < platform.x + platform.width &&
             player.x + player.width > platform.x &&
-            player.y < platform.y + platform.height &&
-            player.y + player.height > platform.y) {
+            player.y + player.height > platform.y &&
+            player.y + player.height < platform.y + platform.height) {
             if (platform.type === 'normal') {
-                player.dy = 2;
+                player.dy = 0;
+                player.onPlatform = true;
+                player.y = platform.y - player.height;
             } else if (platform.type === 'moving') {
                 player.x += platform.dx;
-                player.dy = 1;
+                player.dy = 0;
+                player.onPlatform = true;
+                player.y = platform.y - player.height;
             } else if (platform.type === 'jump') {
-                player.dy = -10;
+                player.dy = -5; // 점프력 감소
+                player.onPlatform = true;
             }
         }
     });
+
+    if (!player.onPlatform) {
+        player.dy = 2;
+    }
 
     if (player.y <= spike.height) {
         if (sounds.gameOver.src) sounds.gameOver.play();
@@ -218,7 +230,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.07) { // 발판 생성 간격 70% 감소
+        if (Math.random() < 0.14) { // 발판 생성 간격 증가 (2배)
             generatePlatform();
         }
 
