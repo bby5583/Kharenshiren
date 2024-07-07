@@ -195,17 +195,23 @@ function checkCollisions() {
 
 function updateScore() {
     score = Math.floor(player.y / 10);
-    level = Math.floor(score / 15) + 1;
-    if (level > 100) {
-        level = 100;
-        isGameOver = true;
-    }
-    levelDisplay.textContent = level;
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('highScore', highScore);
     }
     highScoreDisplay.textContent = highScore;
+}
+
+function updateLevel() {
+    if (!isGameOver) {
+        level++;
+        levelDisplay.textContent = level;
+        if (level <= 100) {
+            setTimeout(updateLevel, 15000);
+        } else {
+            isGameOver = true;
+        }
+    }
 }
 
 function clearCanvas() {
@@ -250,7 +256,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.15) {
+        if (Math.random() < 0.6) {
             generatePlatform();
         }
 
@@ -266,6 +272,7 @@ document.addEventListener('keydown', (e) => {
         startScreen.style.display = 'none';
         if (sounds.start.src) sounds.start.play();
         if (sounds.background.src) sounds.background.play();
+        setTimeout(updateLevel, 15000);
         update();
     }
 
@@ -282,16 +289,4 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-document.addEventListener('click', () => {
-    if (!isGameStarted) {
-        isGameStarted = true;
-        startScreen.style.display = 'none';
-        if (sounds.start.src) sounds.start.play();
-        if (sounds.background.src) sounds.background.play();
-        update();
-    }
-});
-
-retryButton.addEventListener('click', resetGame);
-
-resetGame();
+document
