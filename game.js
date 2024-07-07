@@ -27,10 +27,10 @@ const backgroundImage = new Image();
 backgroundImage.src = 'assets/background.png';
 
 const player = {
-    x: canvas.width / 2 - 40,
+    x: canvas.width / 2 - 22.5,
     y: 50,
-    width: 80,
-    height: 80,
+    width: 45,
+    height: 45,
     speed: 4,
     dx: 0,
     dy: 4,
@@ -111,11 +111,15 @@ function generatePlatform() {
             type = 'jump';
         }
 
-        if (x + platformWidth <= canvas.width && x >= 0) {
+        if (x + platformWidth <= canvas.width && x >= 0 &&
+            !(x < player.x + player.width && x + platformWidth > player.x &&
+            y < player.y + player.height && y + platformHeight > player.y)) {
             validPlatform = true;
         }
 
-        if (validPlatform && platforms.some(platform => Math.abs(platform.y - y) < 25)) {
+        if (validPlatform && platforms.every(platform => Math.abs(platform.y - y) >= 50)) {
+            validPlatform = true;
+        } else {
             validPlatform = false;
         }
     }
@@ -215,7 +219,7 @@ function gameOver() {
 }
 
 function resetGame() {
-    player.x = canvas.width / 2 - 40;
+    player.x = canvas.width / 2 - 22.5;
     player.y = 50;
     player.dx = 0;
     player.dy = 4; // 낙하 속도 증가
@@ -246,7 +250,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.2) {
+        if (Math.random() < 0.15) {
             generatePlatform();
         }
 
