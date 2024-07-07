@@ -10,8 +10,17 @@ const retryButton = document.getElementById('retryButton');
 
 const playerSpriteRight = new Image();
 const playerSpriteLeft = new Image();
-playerSpriteRight.src = 'player_right.png'; // 오른쪽을 향하는 스프라이트 이미지 경로
-playerSpriteLeft.src = 'player_left.png';  // 왼쪽을 향하는 스프라이트 이미지 경로
+playerSpriteRight.src = 'assets/player_right.png';
+playerSpriteLeft.src = 'assets/player_left.png';
+
+const platformImage = new Image();
+platformImage.src = 'assets/platform.png';
+
+const spikeImage = new Image();
+spikeImage.src = 'assets/spike.png';
+
+const backgroundImage = new Image();
+backgroundImage.src = 'assets/background.png';
 
 const player = {
     x: canvas.width / 2 - 15,
@@ -47,10 +56,10 @@ const keys = {
 };
 
 const sounds = {
-    start: new Audio('start.mp3'),
-    fall: new Audio('fall.mp3'),
-    gameOver: new Audio('gameover.mp3'),
-    background: new Audio('background.mp3')
+    start: new Audio('assets/start.mp3'),
+    fall: new Audio('assets/fall.mp3'),
+    gameOver: new Audio('assets/gameover.mp3'),
+    background: new Audio('assets/background.mp3')
 };
 
 sounds.background.loop = true;
@@ -64,14 +73,12 @@ function drawPlayer() {
 }
 
 function drawSpike() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(spike.x, spike.y, spike.width, spike.height);
+    ctx.drawImage(spikeImage, spike.x, spike.y, spike.width, spike.height);
 }
 
 function drawPlatforms() {
-    ctx.fillStyle = 'green';
     platforms.forEach(platform => {
-        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        ctx.drawImage(platformImage, platform.x, platform.y, platform.width, platform.height);
     });
 }
 
@@ -181,6 +188,7 @@ function update() {
 
     if (!isGameOver) {
         clearCanvas();
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         drawSpike();
         drawPlayer();
         drawPlatforms();
