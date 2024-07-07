@@ -159,8 +159,7 @@ function checkCollisions() {
     player.onPlatform = false;
 
     platforms.forEach(platform => {
-        // 캐릭터가 발판 위에 있을 때만 발판 위에 있는 것으로 처리
-        if (player.y + player.height <= platform.y && player.dy >= 0) {
+        if (player.y + player.height <= platform.y && player.y + player.height + player.dy >= platform.y && player.dx === 0) {
             if (player.x < platform.x + platform.width && player.x + player.width > platform.x) {
                 player.dy = 0;
                 player.onPlatform = true;
