@@ -13,8 +13,12 @@ const playerSpriteLeft = new Image();
 playerSpriteRight.src = 'assets/player_right.png';
 playerSpriteLeft.src = 'assets/player_left.png';
 
-const platformImage = new Image();
-platformImage.src = 'assets/platform.png';
+const platformNormalImage = new Image();
+platformNormalImage.src = 'assets/platform_normal.png';
+const platformMovingImage = new Image();
+platformMovingImage.src = 'assets/platform_moving.png';
+const platformJumpImage = new Image();
+platformJumpImage.src = 'assets/platform_jump.png';
 
 const spikeImage = new Image();
 spikeImage.src = 'assets/spike.png';
@@ -23,10 +27,10 @@ const backgroundImage = new Image();
 backgroundImage.src = 'assets/background.png';
 
 const player = {
-    x: canvas.width / 2 - 15,
+    x: canvas.width / 2 - 40,
     y: 50,
-    width: 30,
-    height: 30,
+    width: 80,
+    height: 80,
     speed: 1,
     dx: 0,
     dy: 2,
@@ -35,7 +39,7 @@ const player = {
 
 let platforms = [];
 const platformWidth = canvas.width / 4;
-const platformHeight = 10;
+const platformHeight = 25; // 고정 높이
 
 let level = 1;
 let highScore = localStorage.getItem('highScore') || 0;
@@ -78,24 +82,41 @@ function drawSpike() {
 
 function drawPlatforms() {
     platforms.forEach(platform => {
-        ctx.drawImage(platformImage, platform.x, platform.y, platform.width, platform.height);
+        if (platform.type === 'normal') {
+            ctx.drawImage(platformNormalImage, platform.x, platform.y, platform.width, platform.height);
+        } else if (platform.type === 'moving') {
+            ctx.drawImage(platformMovingImage, platform.x, platform.y, platform.width, platform.height);
+        } else if (platform.type === 'jump') {
+            ctx.drawImage(platformJumpImage, platform.x, platform.y, platform.width, platform.height);
+        }
     });
 }
 
 function generatePlatform() {
     const x = Math.random() * (canvas.width - platformWidth);
     const type = Math.random() < 0.5 ? 'normal' : Math.random() < 0.5 ? 'moving' : 'jump';
-    platforms.push({ x, y: canvas.height, width: platformWidth, height: platformHeight, type, dx: 2 });
+    const lastPlatformY = platforms.length ? platforms[platforms.length - 1].y : canvas.height;
+    const y = lastPlatformY - 90 - Math.random() * 10; // 발판 간 최소 거리 10픽셀, 최대 거리 100픽셀
+
+    platforms.push({ x, y, width: platformWidth, height: platformHeight, type, dx: 2 });
 }
 
 function movePlayer() {
     player.x += player.dx;
     player.y += player.dy;
 
-    if (player.direction === 'right' && player.x + player.width < canvas.width) {
-        player.dx = player.speed;
-    } else if (player.direction === 'left' && player.x > 0) {
-        player.dx = -player.speed;
+    if (player.direction === 'right') {
+        if (player.x + player.width < canvas.width) {
+            player.dx = player.speed;
+        } else {
+            player.dx = 0;
+        }
+    } else if (player.direction === 'left') {
+        if (player.x > 0) {
+            player.dx = -player.speed;
+        } else {
+            player.dx = 0;
+        }
     }
 
     if (player.y + player.height >= canvas.height) {
@@ -166,7 +187,7 @@ function gameOver() {
 }
 
 function resetGame() {
-    player.x = canvas.width / 2 - 15;
+    player.x = canvas.width / 2 - 40;
     player.y = 50;
     player.dx = 0;
     player.dy = 2;
@@ -197,7 +218,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.1) {
+        if (Math.random() < 0.07) { // 발판 생성 간격 70% 감소
             generatePlatform();
         }
 
