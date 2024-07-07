@@ -159,31 +159,16 @@ function checkCollisions() {
     player.onPlatform = false;
 
     platforms.forEach(platform => {
-        if (player.y + player.height <= platform.y) {
-            // 캐릭터가 발판 위에 있을 때만 발판 위에 있는 것으로 처리
+        // 캐릭터가 발판 위에 있을 때만 발판 위에 있는 것으로 처리
+        if (player.y + player.height <= platform.y && player.dy >= 0) {
             if (player.x < platform.x + platform.width && player.x + player.width > platform.x) {
-                if (player.dy > 0) { // 캐릭터가 내려오는 중일 때만
-                    if (platform.type === 'normal') {
-                        player.dy = 0;
-                        player.onPlatform = true;
-                        player.y = platform.y - player.height;
-                    } else if (platform.type === 'moving') {
-                        player.dy = 0;
-                        player.dx += platform.dx * 0.5; // 플레이어의 속도만 변경
-                        player.onPlatform = true;
-                        player.y = platform.y - player.height;
-                    } else if (platform.type === 'jump') {
-                        player.dy = -5; // 점프력 감소
-                        player.onPlatform = true;
-                        player.y = platform.y - player.height;
-                    }
-                }
-            }
-        } else if (player.y + player.height > platform.y && player.y < platform.y + platform.height) {
-            // 캐릭터가 발판 아래에 있을 때 겹침 허용 및 캐릭터가 앞에 그려지도록 함
-            if (player.x < platform.x + platform.width && player.x + player.width > platform.x) {
+                player.dy = 0;
+                player.onPlatform = true;
+                player.y = platform.y - player.height;
                 if (platform.type === 'moving') {
                     player.dx += platform.dx * 0.5;
+                } else if (platform.type === 'jump') {
+                    player.dy = -5; // 점프력 감소
                 }
             }
         }
@@ -252,13 +237,13 @@ function update() {
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         drawSpike();
         drawPlatforms();
-        drawPlayer(); // 플레이어가 발판보다 앞에 그려지도록 변경
+        drawPlayer();
         movePlayer();
         updatePlatforms();
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.2) { // 발판 생성 간격 감소 (더 자주 생성)
+        if (Math.random() < 0.2) {
             generatePlatform();
         }
 
