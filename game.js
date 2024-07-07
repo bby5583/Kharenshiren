@@ -249,7 +249,7 @@ function update() {
         checkCollisions();
         updateScore();
 
-        if (Math.random() < 0.6) { // 발판 생성 간격 감소 (더 자주 생성)
+        if (Math.random() < 0.2) { // 발판 생성 간격 감소 (더 자주 생성)
             generatePlatform();
         }
 
